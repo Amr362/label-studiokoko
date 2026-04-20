@@ -40,8 +40,8 @@ ENV PYTHONUNBUFFERED=1 \
 ADD https://install.python-poetry.org /tmp/install-poetry.py
 RUN python /tmp/install-poetry.py
 
-RUN --mount=type=cache,target="/var/cache/apt",sharing=locked \
-  --mount=type=cache,target="/var/lib/apt/lists",sharing=locked \
+RUN \
+  \
   set -eux; \
   apt-get update; \
   apt-get install --no-install-recommends -y \
@@ -59,12 +59,12 @@ ENV PATH="$VENV_PATH/bin:$PATH"
 COPY pyproject.toml poetry.lock README.md ./
 
 # Install dependencies without dev packages
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR,sharing=locked \
+RUN \
   poetry check --lock && poetry install --no-root --without test --extras uwsgi
 
 # Install LS
 COPY label_studio label_studio
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR,sharing=locked \
+RUN \
   # `--extras uwsgi` is mandatory here due to poetry bug: https://github.com/python-poetry/poetry/issues/7302
   poetry install --only-root --extras uwsgi && \
   python3 label_studio/manage.py collectstatic --no-input
@@ -93,8 +93,8 @@ ENV LS_DIR=/label-studio \
 WORKDIR $LS_DIR
 
 # install prerequisites for app
-RUN --mount=type=cache,target="/var/cache/apt",sharing=locked \
-  --mount=type=cache,target="/var/lib/apt/lists",sharing=locked \
+RUN \
+  \
   set -eux; \
   apt-get update; \
   apt-get upgrade -y; \
@@ -103,8 +103,8 @@ RUN --mount=type=cache,target="/var/cache/apt",sharing=locked \
   apt-get autoremove -y
 
 # install nginx
-RUN --mount=type=cache,target="/var/cache/apt",sharing=locked \
-  --mount=type=cache,target="/var/lib/apt/lists",sharing=locked \
+RUN \
+  \
   set -eux; \
   curl -sSL https://nginx.org/keys/nginx_signing.key | gpg --dearmor -o /etc/apt/keyrings/nginx-archive-keyring.gpg >/dev/null; \
   DEBIAN_VERSION=$(awk -F '=' '/^VERSION_CODENAME=/ {print $2}' /etc/os-release); \
